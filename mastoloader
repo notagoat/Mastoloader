@@ -1,0 +1,26 @@
+#!/usr/bin/env python3
+from pathlib import Path
+import argparse
+import json
+from mastodon import Mastodon
+
+parser = argparse.ArgumentParser(description="A script for uploading files to a Mastodon instance, then returning the URL so it can be shared elsewhere. \n Example usage: mastoloader hellsite dankmeme.jpg")
+parser.add_argument("instance", type=str, help="The instance you would like to upload too. The Access Token should be stored in a JSON file with the instances name in the same directory as this script.")
+parser.add_argument("upload", type=str, help="The filename of the file you would like to upload.")
+args = parser.parse_args()
+
+try:
+	with open(str(Path.home()) + "/.mastoloader/" + args.instance + ".json", 'r') as file:
+		data = json.load(file)
+except Exception as e:
+	print("Error: No Data File Found. Please make sure a file exists in your home directory under ./mastoloader with the name of the file you're trying to use. When entering do not add .json to the name")
+	raise e
+
+mastodon = Mastodon(
+	access_token = data["access_token"],
+    api_base_url = data["URL"],
+)
+
+url = mastodon.media_post(args.upload)
+print("Uploading...")
+print(url["url"])
